@@ -4,159 +4,70 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Request a Demo · InvestiPlay</title>
-<meta name="description" content="Book a walkthrough of InvestiPlay for your school or class. Get in touch with our team." />
+<meta name="description" content="Book a walkthrough of InvestiPlay for your school or class. Get in touch with the founders." />
+<link rel="icon" type="image/png" href="assets/favicon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
-  :root {
-    --ink: #06291f;
-    --forest: #0a3d2e;
-    --emerald: #15604a;
-    --emerald-2: #1c8059;
-    --leaf: #2bb673;
-    --gold: #e0a52e;
-    --gold-soft: #fbf1d6;
-    --mint: #e7f0ea;
-    --paper: #f6fbf7;
-    --white: #ffffff;
-    --dark: #08130e;
-    --line: rgba(10, 61, 46, 0.12);
-    --shadow-lg: 0 24px 70px rgba(6, 41, 31, 0.18);
-    --r-lg: 28px;
-    --r-md: 20px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body {
-    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
-    color: var(--ink);
-    background: var(--mint);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    -webkit-font-smoothing: antialiased;
-  }
-  a { color: inherit; text-decoration: none; }
-  ::selection { background: var(--leaf); color: #042018; }
-  .mono { font-family: "JetBrains Mono", monospace; }
-
-  /* soft decorative blobs */
-  .bg { position: fixed; inset: 0; overflow: hidden; z-index: 0; pointer-events: none; }
-  .bg::before, .bg::after {
-    content: ""; position: absolute; border-radius: 50%; filter: blur(80px); opacity: .5;
-  }
-  .bg::before { width: 520px; height: 520px; top: -160px; right: -120px; background: radial-gradient(circle, rgba(43,182,115,.45), transparent 70%); }
-  .bg::after  { width: 480px; height: 480px; bottom: -180px; left: -120px; background: radial-gradient(circle, rgba(224,165,46,.32), transparent 70%); }
-
-  /* top bar */
-  header { position: relative; z-index: 2; padding: 26px 32px; }
-  .wordmark { font-size: 1.45rem; font-weight: 800; letter-spacing: -.03em; color: var(--forest); }
-  .wordmark .play { color: var(--emerald-2); }
-
-  main { position: relative; z-index: 2; flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px 20px 64px; }
-
-  .card {
-    width: 100%; max-width: 620px; background: var(--white); border: 1px solid var(--line);
-    border-radius: var(--r-lg); box-shadow: var(--shadow-lg); padding: 46px 44px;
-    text-align: center;
-  }
-
-  .pill {
-    display: inline-flex; align-items: center; gap: 8px; font-size: .8rem; font-weight: 700;
-    letter-spacing: .04em; text-transform: uppercase; color: var(--emerald);
-    background: rgba(43,182,115,.12); border: 1px solid rgba(43,182,115,.22);
-    padding: 7px 14px; border-radius: 99px; margin-bottom: 22px;
-  }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--leaf); box-shadow: 0 0 0 4px rgba(43,182,115,.18); }
-
-  h1 { font-size: clamp(1.9rem, 4.5vw, 2.7rem); font-weight: 800; letter-spacing: -.03em; line-height: 1.08; }
-  h1 .accent { color: var(--emerald-2); }
-  .sub { color: #4d7363; font-size: 1.06rem; line-height: 1.55; margin: 16px auto 0; max-width: 46ch; }
-
-  .contact {
-    margin-top: 30px; background: var(--paper); border: 1px solid var(--line);
-    border-radius: var(--r-md); padding: 24px;
-  }
-  .contact .lbl { font-size: .78rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #7fae9a; }
-  .email {
-    display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px;
-    font-size: clamp(1.05rem, 3vw, 1.45rem); font-weight: 800; color: var(--forest); letter-spacing: -.01em;
-    word-break: break-all;
-  }
-  .email:hover { color: var(--emerald-2); }
-  .email svg { flex: none; }
-
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-    font-weight: 700; font-size: 1.02rem; padding: 15px 28px; border-radius: 99px;
-    transition: transform .15s ease, box-shadow .2s ease, background .2s ease;
-  }
-  .btn-gold { background: var(--gold); color: #2a1c00; box-shadow: 0 8px 24px rgba(224,165,46,.35); margin-top: 26px; }
-  .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(224,165,46,.45); }
-
-  .hint { margin-top: 18px; color: #6b8e7f; font-size: .92rem; line-height: 1.5; }
-  .back { display: inline-flex; align-items: center; gap: 7px; margin-top: 30px; color: var(--emerald); font-weight: 600; font-size: .95rem; }
-  .back:hover { color: var(--forest); }
-
-  footer { position: relative; z-index: 2; text-align: center; padding: 26px; color: #6b8e7f; font-size: .85rem; }
-
-  @media (max-width: 560px) { .card { padding: 34px 24px; } }
+  :root { --bg:#070d0a; --text:#eef5f1; --muted:#93aa9f; --brand:#2fd39b; --brand-3:#0f7e5c; --brand-deep:#06291f; --paper:#f3f7f4; --ink:#0b1a13; --ink-2:#4c6459; --ink-line:rgba(11,26,19,.10); --line:rgba(255,255,255,.08); --display:"Sora",system-ui,sans-serif; --sans:"Inter",system-ui,sans-serif; }
+  * { box-sizing: border-box; }
+  body { margin:0; min-height:100vh; display:flex; flex-direction:column; background:var(--bg); color:var(--text); font-family:var(--sans); -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+  a { color:inherit; text-decoration:none; }
+  .bg { position:fixed; inset:0; pointer-events:none; z-index:0; }
+  .bg .orb { position:absolute; border-radius:50%; filter:blur(90px); opacity:.5; }
+  .bg .o1 { width:640px; height:640px; left:50%; top:-260px; transform:translateX(-50%); background:radial-gradient(circle, rgba(47,211,155,.35), transparent 70%); }
+  .bg .o2 { width:480px; height:480px; left:-160px; bottom:-200px; background:radial-gradient(circle, rgba(232,178,58,.14), transparent 70%); }
+  .wm { font-family:var(--display); font-weight:700; letter-spacing:-.035em; font-size:1.35rem; line-height:1; display:inline-flex; align-items:baseline; }
+  .wm .wm-i { position:relative; display:inline-block; }
+  .wm .wm-i::after { content:"$"; position:absolute; left:50%; top:-.42em; transform:translateX(-50%); width:.5em; height:.5em; border-radius:50%; background:var(--brand); color:var(--brand-deep); font-size:.58em; font-weight:800; display:flex; align-items:center; justify-content:center; line-height:1; }
+  .wm.dark { color:var(--ink); }
+  header { position:relative; z-index:2; display:flex; align-items:center; justify-content:space-between; height:72px; padding:0 28px; max-width:1180px; width:100%; margin:0 auto; }
+  header a.login { font-weight:600; font-size:.92rem; padding:10px 16px; border-radius:999px; border:1px solid rgba(255,255,255,.14); }
+  main { position:relative; z-index:1; flex:1; display:flex; align-items:center; justify-content:center; padding:24px 18px 64px; }
+  .card { width:100%; max-width:560px; background:var(--paper); color:var(--ink); border-radius:28px; padding:40px 36px; box-shadow:0 60px 120px -40px rgba(0,0,0,.8); }
+  .eyebrow { display:inline-flex; align-items:center; gap:8px; font-family:var(--display); font-size:.76rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--brand-3); padding:7px 13px; border-radius:999px; border:1px solid rgba(15,126,92,.25); background:rgba(15,126,92,.06); margin-bottom:18px; }
+  .eyebrow i { width:6px; height:6px; border-radius:50%; background:var(--brand-3); }
+  h1 { font-family:var(--display); font-size:clamp(1.8rem,4.5vw,2.5rem); font-weight:700; letter-spacing:-.04em; line-height:1.05; margin:0; }
+  h1 em { font-style:normal; color:var(--brand-3); }
+  .sub { color:var(--ink-2); margin:14px 0 0; line-height:1.55; }
+  .founders { display:grid; gap:10px; margin-top:24px; }
+  .f { display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:16px; background:#fff; border:1px solid var(--ink-line); transition:border-color .2s, transform .2s; }
+  .f:hover { border-color:var(--brand-3); transform:translateY(-2px); }
+  .f .av { width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg,#1d9e75,#0f7e5c); color:#fff; font-family:var(--display); font-weight:700; display:grid; place-items:center; font-size:.85rem; flex:0 0 40px; }
+  .f b { font-family:var(--display); font-weight:600; display:block; }
+  .f small { color:var(--brand-3); font-weight:600; font-size:.85rem; word-break:break-all; }
+  .f svg { margin-left:auto; color:var(--ink-2); flex:none; }
+  .btn { display:flex; align-items:center; justify-content:center; gap:10px; width:100%; margin-top:16px; padding:15px 24px; border-radius:999px; background:var(--ink); color:#fff; font-family:var(--display); font-weight:600; transition:transform .2s, background .2s; }
+  .btn:hover { background:#163227; transform:translateY(-2px); }
+  .hint { margin:14px 0 0; text-align:center; color:var(--ink-2); font-size:.88rem; }
+  .back { display:inline-flex; align-items:center; gap:7px; margin-top:24px; color:var(--brand-3); font-weight:600; font-size:.92rem; }
+  footer { position:relative; z-index:1; text-align:center; padding:24px; color:var(--muted); font-size:.85rem; }
+  @media (max-width:560px) { .card { padding:30px 22px; } }
 </style>
 </head>
 <body>
-  <div class="bg"></div>
-
+  <div class="bg"><div class="orb o1"></div><div class="orb o2"></div></div>
   <header>
-    <a href="/" class="wordmark">Investi<span class="play">Play</span></a>
+    <a href="/" class="wm">Invest<span class="wm-i">ı</span>Play</a>
+    <a class="login" href="https://investiplay.app/auth">Log in</a>
   </header>
-
   <main>
     <div class="card">
-      <span class="pill"><span class="dot"></span> Request a demo</span>
-
-      <h1>Let's bring InvestiPlay <span class="accent">to your students.</span></h1>
-      <p class="sub">
-        Want a walkthrough for your school, district, or classroom? Reach out and we'll set up a quick demo,
-        answer your questions, and help you get started.
-      </p>
-
-      <div class="contact">
-        <div class="lbl">Get in touch</div>
-        <a class="email" href="mailto:eduardorvalle@investiplay.app?subject=InvestiPlay%20Demo%20Request">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15604a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <rect x="3" y="5" width="18" height="14" rx="2.5"></rect>
-            <path d="m3.5 7 8.5 6 8.5-6"></path>
-          </svg>
-          eduardorvalle@investiplay.app
-        </a>
-        <a class="email" href="mailto:devonroy@investiplay.app?subject=InvestiPlay%20Demo%20Request">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15604a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <rect x="3" y="5" width="18" height="14" rx="2.5"></rect>
-            <path d="m3.5 7 8.5 6 8.5-6"></path>
-          </svg>
-          devonroy@investiplay.app
-        </a>
+      <span class="eyebrow"><i></i> Request a demo</span>
+      <h1>Let's bring InvestiPlay <em>to your students.</em></h1>
+      <p class="sub">Want a walkthrough for your school, district or classroom? Email a founder and we'll set up a 20-minute demo, answer your questions and get a free pilot started.</p>
+      <div class="founders">
+        <a class="f" href="mailto:eduardorvalle@investiplay.app?subject=InvestiPlay%20Demo%20Request"><span class="av">ER</span><div><b>Eduardo Ribeiro do Valle</b><small>eduardorvalle@investiplay.app</small></div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="f" href="mailto:devonroy@investiplay.app?subject=InvestiPlay%20Demo%20Request"><span class="av">DR</span><div><b>Devon Roy</b><small>devonroy@investiplay.app</small></div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       </div>
-
-      <a class="btn btn-gold" href="mailto:eduardorvalle@investiplay.app?cc=devonroy@investiplay.app&subject=InvestiPlay%20Demo%20Request&body=Hi%20Eduardo%2C%0A%0AI%27d%20like%20to%20request%20a%20demo%20of%20InvestiPlay.%0A%0AName%3A%0ASchool%2FOrganization%3A%0ARole%3A%0A%23%20of%20students%3A%0A%0AThanks!">
-        Email us to book a demo
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#2a1c00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path>
-        </svg>
+      <a class="btn" href="mailto:eduardorvalle@investiplay.app?cc=devonroy@investiplay.app&subject=InvestiPlay%20Demo%20Request&body=Hi%20Eduardo%20and%20Devon%2C%0A%0AI%27d%20like%20to%20request%20a%20demo%20of%20InvestiPlay.%0A%0AName%3A%0ASchool%2FOrganization%3A%0ARole%3A%0A%23%20of%20students%3A%0A%0AThanks!">Email both founders
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
       </a>
-
-      <p class="hint">Tell us your school and how many students, and we'll tailor the walkthrough. We usually reply within a day.</p>
-
-      <a class="back" href="/">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M19 12H5"></path><path d="m11 18-6-6 6-6"></path>
-        </svg>
-        Back to home
-      </a>
+      <p class="hint">Tell us your school and how many students. We usually reply within a day.</p>
+      <a class="back" href="/"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg> Back to home</a>
     </div>
   </main>
-
-  <footer>© <span class="mono">2026</span> InvestiPlay · Financial literacy by doing</footer>
+  <footer>© 2026 InvestiPlay · Made by students, for students</footer>
 </body>
 </html>

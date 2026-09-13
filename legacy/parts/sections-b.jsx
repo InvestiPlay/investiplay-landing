@@ -99,43 +99,90 @@ function HowItWorks() {
 /* ============== LIVE STOCK SIM — real Yahoo Finance data + adjustable trades ============== */
 const QUICK = ["AAPL", "TSLA", "NVDA", "SPY"];
 
-// Yahoo's chart API doesn't send CORS headers, so we route the request through a
-// public CORS proxy. We try several in order (they rate-limit / go down
-// independently) and degrade gracefully to a simulated feed only if all fail.
-async function fetchYahoo(symbol) {
-  const target = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=1d&interval=5m`;
+// Which Yahoo range/interval each selectable period maps to, plus how many
+// points to keep (intraday needs fewer; a year of daily bars needs more).
+const RANGE_PARAMS = {
+  "1d":  { interval: "5m",  cap: 96 },
+  "5d":  { interval: "30m", cap: 200 },
+  "1mo": { interval: "1d",  cap: 400 },
+  "6mo": { interval: "1d",  cap: 400 },
+  "1y":  { interval: "1d",  cap: 400 },
+};
+
+// Tiny in-memory cache so re-clicking a period you just viewed is instant and
+// the poller doesn't refetch faster than the data actually changes.
+const _chartCache = new Map();
+
+// Yahoo's chart API doesn't send CORS headers, so we route through public CORS
+// proxies. Instead of trying them one-by-one (slow when some are rate-limited),
+// we RACE them all and take the first that returns a valid chart.
+async function fetchViaProxies(target) {
   const enc = encodeURIComponent(target);
   const sources = [
     { url: `https://api.allorigins.win/raw?url=${enc}`, wrapped: false },
-    { url: `https://proxy.cors.sh/${target}`, wrapped: false },
+    { url: `https://corsproxy.io/?url=${enc}`,          wrapped: false },
+    { url: `https://proxy.cors.sh/${target}`,           wrapped: false },
     { url: `https://api.allorigins.win/get?url=${enc}`, wrapped: true },
   ];
-  for (const src of sources) {
-    try {
-      const res = await fetch(src.url, { cache: "no-store" });
-      if (!res.ok) continue;
-      let data = await res.json();
-      if (src.wrapped) data = JSON.parse(data.contents); // allorigins /get wraps the body
-      const r = data && data.chart && data.chart.result && data.chart.result[0];
-      if (!r) continue;
-      const meta = r.meta || {};
-      const q = r.indicators && r.indicators.quote && r.indicators.quote[0];
-      const closes = ((q && q.close) || []).filter((v) => v != null);
-      const price = meta.regularMarketPrice != null ? meta.regularMarketPrice : closes[closes.length - 1];
-      const prev = meta.chartPreviousClose != null ? meta.chartPreviousClose
-                  : (meta.previousClose != null ? meta.previousClose : closes[0]);
-      if (price == null || !closes.length) continue;
-      return {
-        symbol: (meta.symbol || symbol).toUpperCase(),
-        name: meta.longName || meta.shortName || (meta.symbol || symbol).toUpperCase(),
-        currency: meta.currency || "USD",
-        price, prev,
-        series: closes.slice(-64),
-      };
-    } catch (e) { /* try next proxy */ }
-  }
-  return null;
+  const attempts = sources.map((src) => (async () => {
+    const res = await fetch(src.url, { cache: "no-store" });
+    if (!res.ok) throw new Error("status " + res.status);
+    let data = await res.json();
+    if (src.wrapped) data = JSON.parse(data.contents); // allorigins /get wraps the body
+    const r = data && data.chart && data.chart.result && data.chart.result[0];
+    if (!r) throw new Error("no result");
+    return r;
+  })());
+  return await Promise.any(attempts); // first proxy to succeed wins
 }
+
+async function fetchYahoo(symbol, range = "1d") {
+  const cacheKey = `${symbol}|${range}`;
+  const hit = _chartCache.get(cacheKey);
+  if (hit && Date.now() - hit.t < 15000) return hit.data;
+
+  const { interval, cap } = RANGE_PARAMS[range] || RANGE_PARAMS["1d"];
+  const target = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=${range}&interval=${interval}`;
+  try {
+    const r = await fetchViaProxies(target);
+    const meta = r.meta || {};
+    const q = r.indicators && r.indicators.quote && r.indicators.quote[0];
+    // Keep each close paired with its timestamp so the chart can show the
+    // time/date behind any point on hover (drop only the null-close gaps).
+    const rawCloses = (q && q.close) || [];
+    const stamps = r.timestamp || [];
+    const pairs = [];
+    for (let i = 0; i < rawCloses.length; i++) {
+      if (rawCloses[i] != null) pairs.push([stamps[i] != null ? stamps[i] : null, rawCloses[i]]);
+    }
+    const closes = pairs.map((p) => p[1]);
+    if (!closes.length) return null;
+    const price = meta.regularMarketPrice != null ? meta.regularMarketPrice : closes[closes.length - 1];
+    // % change reference: previous close for 1D, start-of-window for longer views.
+    const prev = range === "1d"
+      ? (meta.chartPreviousClose != null ? meta.chartPreviousClose
+         : (meta.previousClose != null ? meta.previousClose : closes[0]))
+      : closes[0];
+    if (price == null) return null;
+    const tail = pairs.slice(-cap);
+    const out = {
+      symbol: (meta.symbol || symbol).toUpperCase(),
+      name: meta.longName || meta.shortName || (meta.symbol || symbol).toUpperCase(),
+      currency: meta.currency || "USD",
+      price, prev,
+      series: tail.map((p) => p[1]),
+      times: tail.map((p) => p[0]),
+    };
+    _chartCache.set(cacheKey, { t: Date.now(), data: out });
+    return out;
+  } catch (e) {
+    return null; // every proxy failed → caller shows the simulated feed
+  }
+}
+
+// Selectable chart periods (Yahoo range values) + a friendly label per period.
+const RANGES = [["1D", "1d"], ["1W", "5d"], ["1M", "1mo"], ["6M", "6mo"], ["1Y", "1y"]];
+const RANGE_LABEL = { "1d": "Today", "5d": "Past week", "1mo": "Past month", "6mo": "Past 6 months", "1y": "Past year" };
 
 function StockSim() {
   const ref = useReveal();
@@ -150,6 +197,9 @@ function StockSim() {
   const [avg, setAvg] = useStateB(0);
   const [qty, setQty] = useStateB(1);
   const [toast, setToast] = useStateB(null);
+  const [hoverI, setHoverI] = useStateB(null); // hovered point on the price chart
+  const [range, setRange] = useStateB("1d");    // selected chart period
+  const chartRef = useRefB(null);
 
   // reset the paper position when switching tickers
   useEffectB(() => { setShares(0); setAvg(0); setQty(1); }, [sym]);
@@ -158,8 +208,9 @@ function StockSim() {
   useEffectB(() => {
     let alive = true;
     setLoading(true);
+    setHoverI(null);
     const run = async () => {
-      const data = await fetchYahoo(sym);
+      const data = await fetchYahoo(sym, range);
       if (!alive) return;
       if (data) {
         setQuote(data);
@@ -173,9 +224,10 @@ function StockSim() {
       setLoading(false);
     };
     run();
-    const id = setInterval(run, 20000);
+    // Intraday moves fast (poll 20s); daily views change slowly (poll 60s).
+    const id = setInterval(run, range === "1d" ? 20000 : 60000);
     return () => { alive = false; clearInterval(id); };
-  }, [sym]);
+  }, [sym, range]);
 
   // when real data is unavailable, drift the simulated series so the chart still lives
   useEffectB(() => {
@@ -220,10 +272,33 @@ function StockSim() {
     setField("");
   };
 
-  const { d, area } = sparkPath(series, 560, 220, 8);
+  const { d, area, pts } = sparkPath(series, 560, 220, 8);
   const holdingsVal = shares * price;
   const total = cash + holdingsVal;
   const pl = shares > 0 ? (price - avg) * shares : 0;
+
+  // ── Hover-to-read: map a pointer x onto the nearest price point ──
+  const times = (quote && quote.times && quote.times.length === series.length) ? quote.times : null;
+  const fmtTime = (t) => {
+    try {
+      const dt = new Date(t * 1000);
+      return range === "1d"
+        ? dt.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+        : dt.toLocaleDateString([], { month: "short", day: "numeric" });
+    } catch (e) { return ""; }
+  };
+  const onHoverMove = (clientX) => {
+    const el = chartRef.current; if (!el) return;
+    const rect = el.getBoundingClientRect(); if (!rect.width) return;
+    let f = (clientX - rect.left) / rect.width; f = Math.max(0, Math.min(1, f));
+    const n = series.length; const step = (560 - 16) / Math.max(1, n - 1);
+    const i = Math.round((f * 560 - 8) / step);
+    setHoverI(Math.max(0, Math.min(n - 1, i)));
+  };
+  const hp = hoverI != null && pts[hoverI] ? pts[hoverI] : null;      // [x,y] in viewBox units
+  const hx = hp ? (hp[0] / 560) * 100 : 0;                            // → % across the chart
+  const hy = hp ? (hp[1] / 220) * 100 : 0;
+  const hColor = dayChg >= 0 ? "#3fe08f" : "#ff8a80";
 
   const StepBtn = ({ label, onClick, disabled }) => (
     <button onClick={onClick} disabled={disabled} className="mono" style={{ width: 38, height: 38, borderRadius: 11, fontSize: "1.1rem", fontWeight: 700,
@@ -265,21 +340,50 @@ function StockSim() {
                   <span style={{ width: 7, height: 7, borderRadius: 99, background: live ? "#4fd99b" : "#e0a52e", display: "inline-block", animation: "pulseDot 1.4s infinite" }} /> {loading ? "LOADING" : live ? "LIVE" : "SIM"}
                 </span>
               </div>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 8 }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 8, flexWrap: "wrap" }}>
                 <span className="mono" style={{ color: "#eafff5", fontSize: "2.4rem", fontWeight: 700, letterSpacing: "-.02em" }}>${fmt(price)}</span>
                 <span className="mono" style={{ color: dayChg >= 0 ? "#4fd99b" : "#ff8a80", fontWeight: 700 }}>{dayChg >= 0 ? "▲" : "▼"} {Math.abs(dayChg).toFixed(2)}%</span>
+                <span style={{ color: "#7fae9a", fontSize: ".8rem", fontWeight: 600 }}>{RANGE_LABEL[range]}</span>
               </div>
-              <svg viewBox="0 0 560 220" style={{ width: "100%", height: 200, display: "block" }}>
-                <defs>
-                  <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={dayChg >= 0 ? "#2bb673" : "#e0524a"} stopOpacity="0.32" />
-                    <stop offset="100%" stopColor={dayChg >= 0 ? "#2bb673" : "#e0524a"} stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                {[0.25, 0.5, 0.75].map((g) => <line key={g} x1="8" x2="552" y1={220 * g} y2={220 * g} stroke="rgba(255,255,255,.06)" strokeWidth="1" />)}
-                <path d={area} fill="url(#sg)" />
-                <path d={d} fill="none" stroke={dayChg >= 0 ? "#3fe08f" : "#ff8a80"} strokeWidth="2.6" strokeLinecap="round" style={{ transition: "all .5s" }} />
-              </svg>
+              {/* Time-period selector */}
+              <div style={{ display: "flex", gap: 6, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
+                {RANGES.map(([label, val]) => (
+                  <button key={val} onClick={() => setRange(val)} className="mono"
+                    style={{ padding: "6px 13px", borderRadius: 9, fontWeight: 700, fontSize: ".78rem", transition: "all .2s",
+                      background: range === val ? "var(--leaf)" : "rgba(255,255,255,.06)",
+                      color: range === val ? "#042018" : "#bfe0d0" }}>{label}</button>
+                ))}
+                {loading && <span className="mono" style={{ color: "#7fae9a", fontSize: ".72rem", marginLeft: 2 }}>updating…</span>}
+              </div>
+              <div ref={chartRef}
+                onMouseMove={(e) => onHoverMove(e.clientX)}
+                onMouseLeave={() => setHoverI(null)}
+                onTouchStart={(e) => onHoverMove(e.touches[0].clientX)}
+                onTouchMove={(e) => onHoverMove(e.touches[0].clientX)}
+                onTouchEnd={() => setHoverI(null)}
+                style={{ position: "relative", width: "100%", cursor: "crosshair", touchAction: "pan-y" }}>
+                {/* preserveAspectRatio none → the line fills the box, so the HTML
+                    crosshair/tooltip overlays line up exactly with the curve. */}
+                <svg viewBox="0 0 560 220" preserveAspectRatio="none" style={{ width: "100%", height: 200, display: "block" }}>
+                  <defs>
+                    <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={dayChg >= 0 ? "#2bb673" : "#e0524a"} stopOpacity="0.32" />
+                      <stop offset="100%" stopColor={dayChg >= 0 ? "#2bb673" : "#e0524a"} stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                  {[0.25, 0.5, 0.75].map((g) => <line key={g} x1="8" x2="552" y1={220 * g} y2={220 * g} stroke="rgba(255,255,255,.06)" strokeWidth="1" vectorEffect="non-scaling-stroke" />)}
+                  <path d={area} fill="url(#sg)" />
+                  <path d={d} fill="none" stroke={hColor} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" style={{ transition: "all .5s" }} />
+                </svg>
+                {hp && <div style={{ position: "absolute", left: `${hx}%`, top: 0, bottom: 0, width: 1, background: "rgba(255,255,255,.28)", transform: "translateX(-50%)", pointerEvents: "none" }} />}
+                {hp && <div style={{ position: "absolute", left: `${hx}%`, top: `${hy}%`, width: 12, height: 12, borderRadius: 99, transform: "translate(-50%,-50%)", background: hColor, border: "2px solid #04140e", boxShadow: `0 0 0 4px ${hColor}33`, pointerEvents: "none" }} />}
+                {hp && (
+                  <div className="mono" style={{ position: "absolute", left: `${Math.max(14, Math.min(86, hx))}%`, top: `${hy}%`, transform: "translate(-50%,-150%)", pointerEvents: "none", background: "#04140e", border: "1px solid rgba(255,255,255,.14)", borderRadius: 10, padding: "6px 10px", whiteSpace: "nowrap", boxShadow: "0 8px 20px rgba(0,0,0,.45)", zIndex: 4 }}>
+                    <div style={{ color: "#eafff5", fontWeight: 700, fontSize: ".92rem", textAlign: "center" }}>${fmt(series[hoverI])}</div>
+                    {times && times[hoverI] != null && <div style={{ color: "#7fae9a", fontSize: ".66rem", marginTop: 2, textAlign: "center" }}>{fmtTime(times[hoverI])}</div>}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* trade panel */}
@@ -327,7 +431,7 @@ function StockSim() {
           )}
         </div>
         <p style={{ textAlign: "center", color: "rgba(6,41,31,.5)", fontSize: ".86rem", marginTop: 16 }}>
-          {live ? "Live intraday prices via Yahoo Finance, refreshed automatically. Trades use virtual cash." : "Live feed unavailable right now — showing a simulated market. Trades use virtual cash."}
+          {live ? "Live market data via Yahoo Finance, refreshed automatically. Trades use virtual cash." : "Live feed unavailable right now — showing a simulated market. Trades use virtual cash."}
         </p>
       </div>
       <style>{`@media (max-width:860px){ .sim-grid{ grid-template-columns:1fr !important; } .sim-head{ grid-template-columns:1fr !important; gap:16px !important; } }`}</style>
