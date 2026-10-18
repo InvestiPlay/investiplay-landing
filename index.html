@@ -705,17 +705,12 @@
      GULLIVER CASE STUDY
      ========================================================= */
   .case-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: clamp(28px, 5vw, 64px); align-items: start; }
-  .case-video { position: sticky; top: 100px; }
+  .case-media { position: sticky; top: 100px; }
   .case-copy .h2 { font-size: clamp(1.9rem, 3.4vw, 2.9rem); }
-  @media (max-width: 900px) { .case-video { position: static; } }
-  .video-wrap { position: relative; border-radius: 26px; overflow: hidden; background: #0b1410; aspect-ratio: 16 / 9; box-shadow: 0 40px 90px -40px rgba(11,26,19,.5); }
-  .video-wrap video, .video-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; object-fit: cover; }
-  .video-ph { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: #cfe7db; text-align: center; padding: 24px; background: radial-gradient(600px 300px at 70% 0%, rgba(47,211,155,.25), transparent 60%), #0b1410; }
-  .video-ph .play { width: 74px; height: 74px; border-radius: 50%; background: var(--brand); color: var(--brand-deep); display: grid; place-items: center; box-shadow: 0 16px 40px rgba(47,211,155,.4); }
-  .video-ph b { font-family: var(--display); font-size: 1.15rem; color: #fff; }
-  .video-ph span { font-size: .85rem; color: var(--muted); max-width: 40ch; }
-  .video-ph code { font-family: var(--mono); font-size: .8rem; color: var(--brand); }
-  .video-cap { display: flex; justify-content: space-between; gap: 12px; margin-top: 14px; font-size: .88rem; color: var(--ink-2); flex-wrap: wrap; }
+  @media (max-width: 900px) { .case-media { position: static; } }
+  .case-photo { position: relative; border-radius: 26px; overflow: hidden; background: #0b1410; aspect-ratio: 3 / 2; box-shadow: 0 40px 90px -40px rgba(11,26,19,.5); }
+  .case-photo img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: cover; }
+  .case-cap { display: flex; justify-content: space-between; gap: 12px; margin-top: 14px; font-size: .88rem; color: var(--ink-2); flex-wrap: wrap; }
   .case-copy .h2 { margin-top: 20px; }
   .case-copy .lead { margin-top: 18px; }
   .case-stats { display: grid; gap: 14px; margin-top: 28px; }
@@ -1341,15 +1336,11 @@
 <!-- ============================ GULLIVER PILOT ============================ -->
 <section class="sec sec-light" id="gulliver" data-theme="light">
   <div class="wrap case-grid">
-    <div class="case-video">
-      <div class="video-wrap" id="videoWrap" data-reveal>
-        <div class="video-ph" id="videoPh">
-          <span class="play"><svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-          <b>Pilot video</b>
-          <span>Drop the file at <code>assets/gulliver-pilot.mp4</code> (or set a YouTube link in PILOT_VIDEO) and it plays here.</span>
-        </div>
+    <div class="case-media">
+      <div class="case-photo" data-reveal>
+        <img src="assets/pilot-classroom.jpg" width="1024" height="684" loading="lazy" decoding="async" alt="A student working through the InvestiPlay dashboard on a laptop during a pilot class" />
       </div>
-      <div class="video-cap"><span>Inside a pilot classroom at Gulliver Middle School</span><span>Spring 2026</span></div>
+      <div class="case-cap"><span>Inside a pilot classroom at Gulliver Middle School</span><span>Spring 2026</span></div>
     </div>
     <div class="case-copy">
       <span class="eyebrow" data-reveal><span class="dot"></span> Case study · Gulliver Middle School</span>
@@ -1589,23 +1580,6 @@
       el.dataset.count = String(n);
       if (el.dataset.done) el.textContent = n.toLocaleString();
     } catch (e) { /* keep the fallback figure */ }
-  })();
-
-  /* ---------- Gulliver pilot video ----------
-     Put your video file at assets/gulliver-pilot.mp4 (H.264 MP4 plays everywhere),
-     or paste a YouTube link into `youtube` below and it will embed instead. */
-  const PILOT_VIDEO = { file: "assets/gulliver-pilot.mp4", poster: "assets/gulliver-pilot.jpg", youtube: "" };
-  (async () => {
-    const wrap = $("#videoWrap"), ph = $("#videoPh");
-    const yt = (PILOT_VIDEO.youtube.match(/(?:v=|youtu\.be\/|embed\/)([\w-]{11})/) || [])[1];
-    if (yt) { ph.remove(); wrap.insertAdjacentHTML("beforeend", `<iframe src="https://www.youtube.com/embed/${yt}?rel=0" title="Gulliver pilot video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`); return; }
-    try {
-      const r = await fetch(PILOT_VIDEO.file, { method: "HEAD" });
-      if (!r.ok) return;
-      const v = document.createElement("video"); v.controls = true; v.playsInline = true; v.preload = "metadata"; v.src = PILOT_VIDEO.file;
-      const pr = await fetch(PILOT_VIDEO.poster, { method: "HEAD" }).catch(() => null); if (pr && pr.ok) v.poster = PILOT_VIDEO.poster;
-      ph.remove(); wrap.appendChild(v);
-    } catch (e) {}
   })();
 
   /* ---------- 85-minute block hover ---------- */
