@@ -747,6 +747,7 @@
   .foot-col b { display: block; color: var(--text); font-family: var(--display); font-weight: 600; font-size: .92rem; margin-bottom: 14px; }
   .foot-col a { display: block; font-size: .92rem; padding: 4px 0; transition: color .2s; }
   .foot-col a:hover { color: var(--brand); }
+  .foot-bottom a:hover { color: var(--brand); }
   .foot-bottom { margin-top: 44px; padding-top: 22px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: .84rem; color: var(--muted-2); }
   @media (max-width: 760px) { .foot-grid { grid-template-columns: 1fr 1fr; } }
   @media (max-width: 440px) { .foot-grid { grid-template-columns: 1fr; } }
@@ -996,7 +997,7 @@
 <section class="stats-band" data-theme="light">
   <div class="wrap">
     <div class="band">
-      <div class="cell" data-reveal><div class="num"><span id="liveStudents" data-count="60">0</span><small id="liveStudentsPlus">+</small></div><div class="lbl">Active students learning on InvestiPlay</div></div>
+      <div class="cell" data-reveal><div class="num"><span data-count="60">0</span><small>+</small></div><div class="lbl">Active students learning on InvestiPlay</div></div>
       <div class="cell" data-reveal style="--d:.08s"><div class="num"><span data-count="2">0</span></div><div class="lbl">Working classroom pilots</div></div>
       <div class="cell" data-reveal style="--d:.16s"><div class="num"><span data-count="300">0</span><small>+</small></div><div class="lbl">Lessons across ten levels</div></div>
     </div>
@@ -1385,7 +1386,7 @@
       <div class="foot-col"><b>Contact</b><a href="mailto:eduardorvalle@investiplay.app">eduardorvalle@investiplay.app</a><a href="mailto:devonroy@investiplay.app">devonroy@investiplay.app</a><a href="https://investiplay.app/auth">Log in</a></div>
     </div>
     <div class="foot-bottom">
-      <span>© 2026 InvestiPlay. All rights reserved.</span>
+      <span>© 2026 InvestiPlay. All rights reserved. · <a href="https://investiplay.app/privacy">Privacy Policy</a> · <a href="https://investiplay.app/terms">Terms of Use</a></span>
       <span>Students trade, invest and build businesses with virtual coins, never real money.</span>
     </div>
   </div>
@@ -1565,22 +1566,6 @@
     '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4L2 9l10 5 10-5z"/><path d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/></svg>'];
   $("#accGrid").innerHTML = ACCOLADES.map((a, i) => `<div class="acc${a.hl ? " hl" : ""}" data-reveal style="--d:${i * .08}s"><span class="yr">${a.year}</span><span class="ic">${icons[i % icons.length]}</span><h3>${a.title}</h3><div class="org">${a.org}</div><p>${a.note}</p></div>`).join("");
   $$("#accGrid [data-reveal]").forEach(el => io.observe(el));
-
-  /* ---------- live student count ----------
-     Calls a read-only Supabase function that returns one integer (student accounts).
-     The key below is the app's public anon key; it can only reach that number. */
-  (async () => {
-    const el = $("#liveStudents");
-    try {
-      const r = await fetch("https://vcjdshippmqopaffuzbw.supabase.co/rest/v1/rpc/public_student_count", {
-        method: "POST", headers: { apikey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjamRzaGlwcG1xb3BhZmZ1emJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4ODk2NjYsImV4cCI6MjA5NTQ2NTY2Nn0.4H_JdSLSefvZbR-RfUUGBwTTMifsqA__0sTKwiNNFsk", Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjamRzaGlwcG1xb3BhZmZ1emJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4ODk2NjYsImV4cCI6MjA5NTQ2NTY2Nn0.4H_JdSLSefvZbR-RfUUGBwTTMifsqA__0sTKwiNNFsk", "Content-Type": "application/json" }, body: "{}",
-      });
-      const n = Number(await r.json());
-      if (!r.ok || !Number.isFinite(n) || n <= 0) return;
-      el.dataset.count = String(n);
-      if (el.dataset.done) el.textContent = n.toLocaleString();
-    } catch (e) { /* keep the fallback figure */ }
-  })();
 
   /* ---------- 85-minute block hover ---------- */
   const tip = $("#barTip");
