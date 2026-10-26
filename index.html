@@ -147,6 +147,12 @@
   .hero-bg .orb-1 { width: 900px; height: 600px; left: 50%; top: 260px; transform: translateX(-50%); background: radial-gradient(ellipse, rgba(47,211,155,.22), rgba(29,158,117,.05) 60%, transparent 72%); }
   .hero-bg .orb-2 { width: 520px; height: 520px; right: -160px; top: 120px; background: radial-gradient(circle, rgba(232,178,58,.10), transparent 70%); }
   .hero-bg .grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(11,26,19,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(11,26,19,.05) 1px, transparent 1px); background-size: 72px 72px; mask-image: radial-gradient(ellipse 70% 55% at 50% 35%, #000 20%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse 70% 55% at 50% 35%, #000 20%, transparent 75%); }
+  /* KAN-303: "Tyrotopia is coming" pill above the hero eyebrow. */
+  .tyro-pill { display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 14px; padding: 8px 8px 8px 16px; border-radius: 999px; background: var(--ink); color: var(--paper); font-size: .9rem; font-weight: 500; text-align: center; transition: transform .2s var(--ease), box-shadow .2s; }
+  .tyro-pill:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(11,26,19,.18); }
+  .tyro-pill:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; }
+  .tyro-pill b { color: var(--brand); font-weight: 700; }
+  .tyro-pill .go { padding: 4px 12px; border-radius: 999px; background: var(--brand); color: var(--ink); font-weight: 700; font-size: .82rem; }
   .hero-in { position: relative; text-align: center; display: flex; flex-direction: column; align-items: center; }
   .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-family: var(--display); font-size: .78rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--brand); padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(47,211,155,.25); background: rgba(47,211,155,.06); }
   .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brand); box-shadow: 0 0 0 4px rgba(47,211,155,.18); animation: pulse 2s infinite; }
@@ -813,6 +819,7 @@
 <header class="hero" id="top" data-theme="light">
   <div class="hero-bg"><div class="grid"></div><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
   <div class="wrap hero-in">
+    <a class="tyro-pill fade-up" style="--d:0s" href="https://tyrotopia.com" target="_blank" rel="noopener noreferrer">Coming soon: InvestiPlay is becoming <b>Tyrotopia</b> <span class="go">See what's next &rarr;</span></a>
     <span class="eyebrow fade-up" style="--d:.05s"><span class="dot"></span> Now enrolling Fall 2026 pilot classrooms</span>
     <h1 aria-label="Your Journey to Financial Literacy">
       <span class="w"><span style="--d:.10s">Your</span></span>
