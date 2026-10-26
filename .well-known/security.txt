@@ -1,0 +1,9 @@
+# Tyrotopia (formerly InvestiPlay)
+# Found a security problem? Please tell us privately at the address below before sharing it.
+# We read every report, reply within 3 school days, and never take action against good-faith research.
+# Please don't access, change or keep other people's data (our users are students), and don't run
+# load or denial-of-service tests.
+Contact: mailto:security@tyrotopia.com
+Expires: 2027-10-26T00:00:00.000Z
+Preferred-Languages: en, es
+Canonical: https://investiplayapp.com/.well-known/security.txt
