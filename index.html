@@ -152,6 +152,8 @@
   .tyro-pill:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(11,26,19,.18); }
   .tyro-pill:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; }
   .tyro-pill b { color: var(--brand); font-weight: 700; }
+  .tyro-pill { max-width: 720px; border-radius: 22px; text-align: center; line-height: 1.45; }
+  .tyro-pill .pill-text { flex: 1 1 280px; }
   .tyro-pill .go { padding: 4px 12px; border-radius: 999px; background: var(--brand); color: var(--ink); font-weight: 700; font-size: .82rem; }
   .hero-in { position: relative; text-align: center; display: flex; flex-direction: column; align-items: center; }
   .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-family: var(--display); font-size: .78rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--brand); padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(47,211,155,.25); background: rgba(47,211,155,.06); }
@@ -819,7 +821,7 @@
 <header class="hero" id="top" data-theme="light">
   <div class="hero-bg"><div class="grid"></div><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
   <div class="wrap hero-in">
-    <a class="tyro-pill fade-up" style="--d:0s" href="https://tyrotopia.com" target="_blank" rel="noopener noreferrer">Coming soon: InvestiPlay is becoming <b>Tyrotopia</b> <span class="go">See what's next &rarr;</span></a>
+    <a class="tyro-pill fade-up" style="--d:0s" href="https://tyrotopia.com" target="_blank" rel="noopener noreferrer"><span class="pill-text">InvestiPlay retires on <b>Sunday, November 15</b>. Love what it is? Get something even better: sign in to <b>Tyrotopia</b> with your InvestiPlay login and start a new journey.</span> <span class="go">Go to Tyrotopia &rarr;</span></a>
     <span class="eyebrow fade-up" style="--d:.05s"><span class="dot"></span> Now enrolling Fall 2026 pilot classrooms</span>
     <h1 aria-label="Your Journey to Financial Literacy">
       <span class="w"><span style="--d:.10s">Your</span></span>
